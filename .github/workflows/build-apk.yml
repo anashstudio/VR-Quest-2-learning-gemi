@@ -6,72 +6,54 @@ on:
   workflow_dispatch:
 
 jobs:
-  build-android:
+  build:
+    name: Build Godot Android APK
     runs-on: ubuntu-latest
+    
     steps:
-      - name: چک‌اوت پروژه
+      - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: نصب جاوا ۱۷
+      - name: Set up Java 17
         uses: actions/setup-java@v4
         with:
-          distribution: temurin
+          distribution: 'temurin'
           java-version: '17'
 
-      - name: نصب Android SDK
+      - name: Set up Android SDK
         uses: android-actions/setup-android@v3
 
-      - name: ساخت debug keystore برای امضای APK
+      - name: Install Godot Engine
         run: |
+          GODOT_VERSION=4.3-stable
+          wget -q https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}/Godot_v${GODOT_VERSION}_linux.x86_64.zip
+          unzip -q Godot_v${GODOT_VERSION}_linux.x86_64.zip
+          mv Godot_v${GODOT_VERSION}_linux.x86_64 /usr/local/bin/godot4
+          
+          wget -q https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}/Godot_v${GODOT_VERSION}_export_templates.tpz
+          mkdir -p ~/.local/share/godot/export_templates/4.3.stable
+          unzip -q Godot_v${GODOT_VERSION}_export_templates.tpz -d /tmp/templates
+          cp -r /tmp/templates/templates/* ~/.local/share/godot/export_templates/4.3.stable/
+
+      - name: Generate Debug Keystore
+        run: |
+          keytool -keyalg RSA -keysize 2048 -genkeypair -alias androiddebugkey -keypass android -keystore debug.keystore -storepass android -dname "CN=Android Debug,O=Android,C=US" -validity 10000
           mkdir -p ~/.android
-          keytool -genkeypair -alias androiddebugkey -keypass android -keystore ~/.android/debug.keystore -storepass android -dname "CN=Android Debug,O=Android,C=US" -validity 9999 -keyalg RSA -keysize 2048
+          cp debug.keystore ~/.android/debug.keystore
 
-      - name: دانلود اجرایی گودو
+      - name: Setup Android Build Template
         run: |
-          wget -q "https://github.com/godotengine/godot/releases/download/4.3-stable/Godot_v4.3-stable_linux.x86_64.zip" -O godot.zip
-          unzip -q godot.zip && chmod +x Godot_v4.3-stable_linux.x86_64 && sudo mv Godot_v4.3-stable_linux.x86_64 /usr/local/bin/godot4
-
-      - name: دانلود export templates
-        run: |
-          wget -q "https://github.com/godotengine/godot/releases/download/4.3-stable/Godot_v4.3-stable_export_templates.tpz" -O templates.tpz
-          mkdir -p "$HOME/.local/share/godot/export_templates/4.3.stable"
-          unzip -q templates.tpz -d /tmp/templates_extract
-          cp -r /tmp/templates_extract/templates/* "$HOME/.local/share/godot/export_templates/4.3.stable/"
-
-      - name: نصب افزونه OpenXR Vendors
-        run: |
-          wget -q "https://github.com/GodotVR/godot_openxr_vendors/releases/download/3.1.2-stable/godotopenxrvendorsaddon.zip" -O openxr_vendors.zip
-          mkdir -p addons
-          unzip -q openxr_vendors.zip "asset/addons/godotopenxrvendors/*" -d /tmp/vendors_extract
-          cp -r /tmp/vendors_extract/asset/addons/godotopenxrvendors addons/godotopenxrvendors
-
-      - name: نصب Android Build Template
-        run: |
-          mkdir -p android
-          unzip -q "$HOME/.local/share/godot/export_templates/4.3.stable/android_source.zip" -d android/build
-          chmod +x android/build/gradlew
+          mkdir -p android/build
+          unzip -q ~/.local/share/godot/export_templates/4.3.stable/android_source.zip -d android/build/
           echo "4.3.stable" > android/.build_version
 
-      - name: تنظیم مسیر Android SDK برای گودو
-        run: |
-          mkdir -p ~/.config/godot
-          echo -e "[editor_settings]\n\nexport/android/android_sdk_path=\"$ANDROID_HOME\"" > ~/.config/godot/editor_settings-4.tres
-
-      - name: ایمپورت اولیه
-        run: godot4 --headless --editor --quit --path .
-
-      - name: Export به APK
-        env:
-          GODOT_ANDROID_KEYSTORE_DEBUG_PATH: /home/runner/.android/debug.keystore
-          GODOT_ANDROID_KEYSTORE_DEBUG_USER: androiddebugkey
-          GODOT_ANDROID_KEYSTORE_DEBUG_PASSWORD: android
+      - name: Run Export
         run: |
           mkdir -p build
-          godot4 --headless --verbose --export-debug "Quest Android" build/cabinet-workshop.apk
+          godot4 --headless --export-debug "Quest Android" build/app.apk
 
-      - name: آپلود APK
+      - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: cabinet-workshop-quest2-apk
+          name: quest2-apk
           path: build/*.apk
-          if-no-files-found: error
