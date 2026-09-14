@@ -65,7 +65,7 @@ jobs:
           GODOT_ANDROID_KEYSTORE_DEBUG_PASSWORD: android
         run: |
           mkdir -p build
-          godot4 --headless --verbose --export-debug "Quest Android" build/cabinet-workshop.apk
+          godot4 --headless --verbose --export-debug Quest Android build/cabinet-workshop.apk
 
       - name: آپلود فایل APK به عنوان Artifact
         uses: actions/upload-artifact@v4
