@@ -52,6 +52,11 @@ jobs:
           chmod +x android/build/gradlew
           echo "4.3.stable" > android/.build_version
 
+      - name: تنظیم مسیر Android SDK برای گودو
+        run: |
+          mkdir -p ~/.config/godot
+          echo -e "[editor_settings]\n\nexport/android/android_sdk_path=\"$ANDROID_HOME\"" > ~/.config/godot/editor_settings-4.tres
+
       - name: ایمپورت اولیه
         run: godot4 --headless --editor --quit --path .
 
