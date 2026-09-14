@@ -1,0 +1,30 @@
+[gd_scene load_steps=3 format=3]
+
+[node name="MainScene" type="Node3D"]
+
+[node name="XROrigin3D" type="XROrigin3D" parent="."]
+
+[node name="XRCamera3D" type="XRCamera3D" parent="XROrigin3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.7, 0)
+
+[node name="LeftController" type="XRController3D" parent="XROrigin3D"]
+tracker = &"left_hand"
+
+[node name="RightController" type="XRController3D" parent="XROrigin3D"]
+tracker = &"right_hand"
+
+[node name="Environment" type="Node3D" parent="."]
+
+[node name="Floor" type="CSGBox3D" parent="Environment"]
+size = Vector3(10, 0.1, 10)
+
+[node name="WallLogoAndTitle" type="Label3D" parent="Environment"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.5, -4)
+text = "اداره آموزش و تعالی منابع انسانی
+شرکت پالایش نفت اصفهان
+مرکز منابع یادگیری"
+font_size = 48
+
+[node name="TrainingTable" type="CSGBox3D" parent="Environment"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.8, -1.5)
+size = Vector3(1.5, 0.1, 0.8)

@@ -1,0 +1,8 @@
+[application]
+config/name="مرکز منابع یادگیری - آموزش واقعیت مجازی"
+run/main_scene="res://main.tscn"
+config/features=PackedStringArray("4.3", "Forward Plus")
+
+[xr]
+openxr/enabled=true
+xr_features/xr_coding=true
