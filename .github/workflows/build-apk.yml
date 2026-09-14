@@ -25,10 +25,7 @@ jobs:
       - name: ساخت debug keystore برای امضای APK
         run: |
           mkdir -p ~/.android
-          keytool -genkeypair -alias androiddebugkey \
-            -keypass android -keystore ~/.android/debug.keystore \
-            -storepass android -dname "CN=Android Debug,O=Android,C=US" \
-            -validity 9999 -keyalg RSA -keysize 2048
+          keytool -genkeypair -alias androiddebugkey -keypass android -keystore ~/.android/debug.keystore -storepass android -dname "CN=Android Debug,O=Android,C=US" -validity 9999 -keyalg RSA -keysize 2048
 
       - name: دانلود اجرایی گودو
         run: |
@@ -44,15 +41,14 @@ jobs:
           unzip -q templates.tpz -d /tmp/templates_extract
           cp -r /tmp/templates_extract/templates/* "$HOME/.local/share/godot/export_templates/${GODOT_INTERNAL_VERSION}/"
 
-      - name: نصب افزونه‌ی Godot OpenXR Vendors (لودر واقعی Meta Quest)
+      - name: نصب افزونه‌ی Godot OpenXR Vendors
         run: |
           wget -q "https://github.com/GodotVR/godot_openxr_vendors/releases/download/3.1.2-stable/godotopenxrvendorsaddon.zip" -O openxr_vendors.zip
           mkdir -p addons
           unzip -q openxr_vendors.zip "asset/addons/godotopenxrvendors/*" -d /tmp/vendors_extract
           cp -r /tmp/vendors_extract/asset/addons/godotopenxrvendors addons/godotopenxrvendors
-          ls addons/godotopenxrvendors
 
-      - name: نصب Android Build Template داخل پروژه (لازم برای OpenXR)
+      - name: نصب Android Build Template
         run: |
           mkdir -p android
           unzip -q "$HOME/.local/share/godot/export_templates/${GODOT_INTERNAL_VERSION}/android_source.zip" -d android/build
